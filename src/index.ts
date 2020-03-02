@@ -1,7 +1,12 @@
 import "reflect-metadata";
 import { createConnection } from "typeorm";
 import Telegraf from "telegraf";
-import { CommandParser, CountDown, Memo as MemoCommand } from "./middleware";
+import {
+  CommandParser,
+  CountDown,
+  Memo as MemoCommand,
+  Select
+} from "./middleware";
 import { Memo } from "./entity";
 
 createConnection({
@@ -23,5 +28,6 @@ const bot = new Telegraf(process.env.BOT_TOKEN, {
 bot.use(CommandParser());
 bot.action("delmsg", async ctx => await ctx.deleteMessage());
 bot.command("cnt", CountDown);
+bot.command("sel", Select);
 bot.hears(/^\/.*/, MemoCommand);
 bot.launch();
