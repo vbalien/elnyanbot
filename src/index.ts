@@ -5,7 +5,8 @@ import {
   CommandParser,
   CountDown,
   Memo as MemoCommand,
-  Select
+  Select,
+  Anitable
 } from "./middleware";
 import { Memo } from "./entity";
 
@@ -17,7 +18,7 @@ createConnection({
   synchronize: true,
   logging: false
 })
-  .then(_ => {
+  .then(() => {
     console.log("MongoDB Connected.");
   })
   .catch(error => console.log(error));
@@ -29,5 +30,6 @@ bot.use(CommandParser());
 bot.action("delmsg", async ctx => await ctx.deleteMessage());
 bot.command("cnt", CountDown);
 bot.command("sel", Select);
+bot.command("anitable", Anitable);
 bot.hears(/^\/.*/, MemoCommand);
 bot.launch();
