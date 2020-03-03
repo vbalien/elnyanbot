@@ -2,6 +2,7 @@ import { Middleware } from "telegraf";
 import { ContextMessageUpdateWithState } from "./CommandParser";
 import { getManager } from "typeorm";
 import { Memo } from "../entity";
+import { KeyboardBuilder } from "../util";
 
 const MemoCommand: Middleware<ContextMessageUpdateWithState> = async ctx => {
   const name = ctx.message.text.slice(1);
@@ -30,16 +31,9 @@ const MemoCommand: Middleware<ContextMessageUpdateWithState> = async ctx => {
     memo.name = name;
     await getManager().save(memo);
     ctx.reply("저장하였습니다.", {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "메시지 지우기",
-              callback_data: "delmsg"
-            }
-          ]
-        ]
-      }
+      reply_markup: new KeyboardBuilder()
+        .addRow([["메시지 지우기", "delmsg"]])
+        .build()
     });
   }
 };
