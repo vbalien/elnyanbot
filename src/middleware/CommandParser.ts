@@ -20,13 +20,22 @@ const regex = /^\/([^@\s]+)@?(?:(\S+)|)\s?([\s\S]+)?$/i;
 
 export default () =>
   Telegraf.mount<ContextMessageUpdateWithState, ContextMessageUpdateWithState>(
-    "message",
+    ["message", "callback_query"],
     (ctx, next) => {
+      let text: string | null;
       if (ctx.message && ctx.message.text) {
-        const parts = regex.exec(ctx.message.text.trim());
+        text = ctx.message.text;
+      } else if (ctx.callbackQuery && ctx.callbackQuery.data) {
+        text = ctx.callbackQuery.data;
+      } else {
+        text = null;
+      }
+
+      if (text !== null) {
+        const parts = regex.exec(text.trim());
         if (!parts) return next();
         const command = {
-          text: ctx.message.text,
+          text,
           command: parts[1],
           bot: parts[2],
           args: parts[3],

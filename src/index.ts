@@ -27,9 +27,16 @@ const bot = new Telegraf(process.env.BOT_TOKEN, {
   username: process.env.BOT_NAME
 });
 bot.use(CommandParser());
-bot.action("delmsg", async ctx => await ctx.deleteMessage());
+bot.action("delmsg", async ctx => {
+  try {
+    await ctx.deleteMessage();
+  } catch (e) {
+    console.log(e.description);
+  }
+});
 bot.command("cnt", CountDown);
 bot.command("sel", Select);
 bot.command("anitable", Anitable);
+bot.action(/^\/anitable \d$/, Anitable);
 bot.hears(/^\/.*/, MemoCommand);
 bot.launch();
