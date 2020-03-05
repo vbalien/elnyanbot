@@ -6,7 +6,8 @@ import {
   CountDown,
   Memo as MemoCommand,
   Select,
-  Anitable
+  Anitable,
+  DeleteMemoCommand
 } from "./middleware";
 import { Memo } from "./entity";
 
@@ -37,6 +38,7 @@ bot.action("delmsg", async ctx => {
 bot.command("cnt", CountDown);
 bot.command("sel", Select);
 bot.command("anitable", Anitable);
+bot.command("memodel", DeleteMemoCommand);
 bot.action(/^\/anitable \d$/, Anitable);
 bot.hears(/^\/.*/, MemoCommand);
 bot.launch();

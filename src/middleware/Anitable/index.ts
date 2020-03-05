@@ -14,7 +14,8 @@ const makeText = (data: AnimeEntity[], weekNum: number) => `${
   `;
 const Anitable: Middleware<ContextMessageUpdateWithState> = async ctx => {
   let currentWeek = Number.parseInt(ctx.state.command.args);
-  if (Number.isNaN(currentWeek)) currentWeek = DateTime.local().weekday % 7;
+  if (Number.isNaN(currentWeek))
+    currentWeek = DateTime.local().setZone("Asia/Seoul").weekday % 7;
   const data = await Api.list(currentWeek);
   const options = {
     reply_markup: new KeyboardBuilder()
