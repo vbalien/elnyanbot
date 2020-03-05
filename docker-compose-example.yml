@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  bot:
+    build: .
+    restart: always
+    environment:
+      MONGO_HOST: YOUR_MONGODB_HOST
+      BOT_TOKEN: YOUR_BOT_TOKEN
+      BOT_NAME: YOUR_BOT_NAME

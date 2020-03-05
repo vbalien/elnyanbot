@@ -31,10 +31,11 @@ const Anitable: Middleware<ContextMessageUpdateWithState> = async ctx => {
       .addRow([["메시지 지우기", "delmsg"]])
       .build()
   };
-  if (!ctx.callbackQuery) {
-    ctx.reply(makeText(data, currentWeek), options);
-  } else {
-    ctx.editMessageText(makeText(data, currentWeek), options);
+  try {
+    const send = !ctx.callbackQuery ? ctx.reply : ctx.editMessageText;
+    await send(makeText(data, currentWeek), options);
+  } catch (e) {
+    console.log(e);
   }
 };
 
