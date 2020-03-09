@@ -20,7 +20,7 @@ const Anitable: Middleware<ContextMessageUpdateWithState> = async ctx => {
   const options = {
     reply_markup: new KeyboardBuilder()
       .addRow([
-        ["이전", `/anitable ${(currentWeek - 1) % 7}`],
+        ["이전", `/anitable ${(((currentWeek - 1) % 7) + 7) % 7}`],
         ["다음", `/anitable ${(currentWeek + 1) % 7}`]
       ])
       .addRow(

@@ -7,7 +7,8 @@ import {
   Memo as MemoCommand,
   Select,
   Anitable,
-  DeleteMemoCommand
+  DeleteMemoCommand,
+  SchoolFood
 } from "./middleware";
 import { Memo } from "./entity";
 
@@ -38,7 +39,9 @@ bot.action("delmsg", async ctx => {
 bot.command("cnt", CountDown);
 bot.command("sel", Select);
 bot.command("anitable", Anitable);
+bot.command("schoolfood", SchoolFood);
 bot.command("memodel", DeleteMemoCommand);
 bot.action(/^\/anitable \d$/, Anitable);
+bot.action(/^\/schoolfood \d$/, SchoolFood);
 bot.hears(/^\/.*/, MemoCommand);
 bot.launch();
