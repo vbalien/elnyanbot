@@ -75,9 +75,13 @@ export class AnimeEntity {
 
 export default {
   async list(week: Weekday): Promise<AnimeEntity[]> {
-    const raws: AnimeEntityRaw[] = (
-      await api.get("/list", { params: { w: week } })
-    ).data;
-    return raws.map(raw => new AnimeEntity(raw));
+    try {
+      const raws: AnimeEntityRaw[] = (
+        await api.get("/list", { params: { w: week } })
+      ).data;
+      return raws.map(raw => new AnimeEntity(raw));
+    } catch {
+      return [];
+    }
   }
 };

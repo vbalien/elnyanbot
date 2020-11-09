@@ -1,4 +1,5 @@
-import Telegraf, { ContextMessageUpdate } from "telegraf";
+import Telegraf from "telegraf";
+import { TelegrafContext } from "telegraf/typings/context";
 
 interface Command {
   text: string;
@@ -12,14 +13,14 @@ interface State {
   command: Command;
 }
 
-export interface ContextMessageUpdateWithState extends ContextMessageUpdate {
+export interface TelegrafContextWithState extends TelegrafContext {
   state?: State;
 }
 
 const regex = /^\/([^@\s]+)@?(?:(\S+)|)\s?([\s\S]+)?$/i;
 
 export default () =>
-  Telegraf.mount<ContextMessageUpdateWithState, ContextMessageUpdateWithState>(
+  Telegraf.mount<TelegrafContextWithState>(
     ["message", "callback_query"],
     (ctx, next) => {
       let text: string | null;

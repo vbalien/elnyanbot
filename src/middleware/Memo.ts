@@ -1,10 +1,10 @@
 import { Middleware } from "telegraf";
-import { ContextMessageUpdateWithState } from "./CommandParser";
 import { getManager } from "typeorm";
 import { Memo } from "../entity";
 import { KeyboardBuilder } from "../util";
+import { TelegrafContextWithState } from "./CommandParser";
 
-const MemoCommand: Middleware<ContextMessageUpdateWithState> = async ctx => {
+const MemoCommand: Middleware<TelegrafContextWithState> = async ctx => {
   const name = ctx.message.text.slice(1);
   let memo = await getManager().findOne(Memo, {
     chat_id: ctx.message.chat.id,
@@ -30,15 +30,19 @@ const MemoCommand: Middleware<ContextMessageUpdateWithState> = async ctx => {
     memo.message_id = ctx.message.reply_to_message.message_id;
     memo.name = name;
     await getManager().save(memo);
-    await ctx.reply("저장하였습니다.", {
-      reply_markup: new KeyboardBuilder()
-        .addRow([["메시지 지우기", "delmsg"]])
-        .build()
-    });
+    try {
+      await ctx.reply("저장하였습니다.", {
+        reply_markup: new KeyboardBuilder()
+          .addRow([["메시지 지우기", "delmsg"]])
+          .build(),
+      });
+    } catch (e) {
+      console.log(e.description);
+    }
   }
 };
 
-export const DeleteMemoCommand: Middleware<ContextMessageUpdateWithState> = async ctx => {
+export const DeleteMemoCommand: Middleware<TelegrafContextWithState> = async ctx => {
   const name = ctx.state.command.args;
   const manager = await getManager();
   const memo = await manager.findOne(Memo, {

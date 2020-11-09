@@ -1,14 +1,14 @@
 import { Middleware } from "telegraf";
-import { ContextMessageUpdateWithState } from "../CommandParser";
 import Api, { MenuKind, Menu, MenuString } from "./Api";
 import { KeyboardBuilder } from "../../util";
+import { TelegrafContextWithState } from "../CommandParser";
 
 const makeText = (data: Menu) =>
   `<b>${data.name}</b>\n${data.foods.reduce(
     (acc, cur) => acc + `${cur}\n`,
     ""
   )}\n`;
-const SchoolFood: Middleware<ContextMessageUpdateWithState> = async ctx => {
+const SchoolFood: Middleware<TelegrafContextWithState> = async ctx => {
   let restaurant = Number.parseInt(ctx.state.command.args);
   if (Number.isNaN(restaurant)) restaurant = MenuKind.STUDENT;
   const menus = await Api.getMenu(restaurant);
