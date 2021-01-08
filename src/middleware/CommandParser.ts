@@ -43,8 +43,8 @@ export default () =>
           get splitArgs() {
             return !parts[3]
               ? []
-              : parts[3].split(/\s+/).filter(arg => arg.length);
-          }
+              : parts[3].split(/\s+/).filter((arg) => arg.length);
+          },
         };
         ctx.state.command = command;
       }

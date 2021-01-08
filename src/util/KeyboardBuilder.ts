@@ -1,6 +1,6 @@
 import {
   InlineKeyboardMarkup,
-  InlineKeyboardButton
+  InlineKeyboardButton,
 } from "telegraf/typings/telegram-types";
 
 export default class KeyboardBuilder {
@@ -12,9 +12,9 @@ export default class KeyboardBuilder {
 
   addRow(colList: [string, string][]) {
     this.raw.push(
-      colList.map(col => ({
+      colList.map((col) => ({
         text: col[0],
-        callback_data: col[1]
+        callback_data: col[1],
       }))
     );
     return this;
@@ -22,7 +22,7 @@ export default class KeyboardBuilder {
 
   build(): InlineKeyboardMarkup {
     return {
-      inline_keyboard: this.raw
+      inline_keyboard: this.raw,
     };
   }
 }

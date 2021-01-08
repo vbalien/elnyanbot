@@ -1,8 +1,8 @@
 import { Middleware } from "telegraf";
 import { Message } from "telegraf/typings/telegram-types";
-import { TelegrafContextWithState } from "./CommandParser";
+import { AppContext } from "../initApp";
 
-const CountDown: Middleware<TelegrafContextWithState> = async ctx => {
+const CountDown: Middleware<AppContext> = async (ctx) => {
   let startCount = Number.parseInt(ctx.state.command.splitArgs[0]);
   if (Number.isNaN(startCount)) startCount = 5;
   const lastMessage: string = ctx.state.command.splitArgs[1] || "ㄱㄱ";

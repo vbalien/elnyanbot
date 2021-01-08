@@ -1,9 +1,10 @@
 FROM alpine:latest
-LABEL maintainer="Jisu Kim <vbalien@live.jp>"
+LABEL maintainer="Jisu Kim <webmaster@alien.moe>"
 
 RUN apk add --no-cache nodejs yarn
 WORKDIR /usr/src/app
-COPY package.json yarn.lock ./
+COPY package.json yarn.lock tsconfig.json ./
 RUN yarn
 COPY . .
+RUN yarn build
 CMD [ "yarn", "serve" ]

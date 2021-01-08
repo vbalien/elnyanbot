@@ -3,7 +3,7 @@ import { DateTime, Interval } from "luxon";
 
 const api = axios.create({
   baseURL: "https://www.anissia.net/anitime/",
-  timeout: 1000
+  timeout: 1000,
 });
 
 export enum Weekday {
@@ -15,7 +15,7 @@ export enum Weekday {
   FRI,
   SAT,
   ETC,
-  NEW
+  NEW,
 }
 
 interface AnimeEntityRaw {
@@ -79,9 +79,9 @@ export default {
       const raws: AnimeEntityRaw[] = (
         await api.get("/list", { params: { w: week } })
       ).data;
-      return raws.map(raw => new AnimeEntity(raw));
+      return raws.map((raw) => new AnimeEntity(raw));
     } catch {
       return [];
     }
-  }
+  },
 };

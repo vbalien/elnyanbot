@@ -1,7 +1,7 @@
 import { Middleware } from "telegraf";
-import { TelegrafContextWithState } from "./CommandParser";
+import { AppContext } from "../initApp";
 
-const Select: Middleware<TelegrafContextWithState> = ctx => {
+const Select: Middleware<AppContext> = (ctx) => {
   const len = ctx.state.command.splitArgs.length;
   if (len <= 0) return;
   const rndVal = Math.floor(Math.random() * len);
