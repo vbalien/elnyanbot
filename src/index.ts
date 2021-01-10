@@ -1,23 +1,14 @@
+import { Container } from "inversify";
 import "reflect-metadata";
-import {
-  CountDown,
-  Memo as MemoCommand,
-  Select,
-  Anitable,
-  DeleteMemoCommand,
-  SchoolFood,
-} from "./command";
-import { initApp } from "./initApp";
+import App from "./App";
+import { bindings } from "./inversify.config";
+import "./middleware";
 
 (async () => {
-  const bot = await initApp();
-  bot.command("cnt", CountDown);
-  bot.command("sel", Select);
-  bot.command("anitable", Anitable);
-  bot.command("schoolfood", SchoolFood);
-  bot.command("memodel", DeleteMemoCommand);
-  bot.action(/^\/anitable \d$/, Anitable);
-  bot.action(/^\/schoolfood \d$/, SchoolFood);
-  bot.hears(/^\/.*/, MemoCommand);
+  const container = new Container();
+  await container.loadAsync(bindings);
+  const app = new App(process.env.BOT_TOKEN, container);
+  const bot = app.build();
+
   bot.launch();
 })();
