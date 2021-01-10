@@ -11,5 +11,6 @@
     "sourceMap": true,
     "outDir": "dist",
     "types": ["reflect-metadata"]
-  }
+  },
+  "includes": ["./src/**/*.d.ts"]
 }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Container } from "inversify";
 import Telegraf from "telegraf";
 import { MiddlewareFn } from "telegraf/typings/composer";
@@ -43,7 +42,7 @@ export default class App {
 
       this._container
         .bind(TYPE.Middleware)
-        .to(constructor as any)
+        .to(constructor as MiddlewareConstructor)
         .whenTargetNamed(name);
     }
 
@@ -95,9 +94,10 @@ export default class App {
     key: string | symbol
   ): MiddlewareFn<AppContext> {
     return async (ctx) => {
-      await ctx.container
-        .getNamed<any>(TYPE.Middleware, middlewareName)
-        [key](ctx);
+      if (typeof key === "string")
+        await ctx.container
+          .getNamed<Record<string, Function>>(TYPE.Middleware, middlewareName)
+          [key](ctx);
     };
   }
 

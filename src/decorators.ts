@@ -2,18 +2,17 @@ import { decorate, injectable } from "inversify";
 import { HearsTriggers } from "telegraf/typings/composer";
 import { TelegrafContext } from "telegraf/typings/context";
 import { METADATA_KEY } from "./constants";
-import { interfaces } from "./interfaces";
 
 export function middleware(): ClassDecorator {
   return function (target) {
-    const currentMetadata: interfaces.MiddlewareMetadata = {
+    const currentMetadata: MiddlewareMetadata = {
       target,
     };
 
     decorate(injectable(), target);
     Reflect.defineMetadata(METADATA_KEY.middleware, currentMetadata, target);
 
-    const previousMetadata: interfaces.MiddlewareMetadata[] =
+    const previousMetadata: MiddlewareMetadata[] =
       Reflect.getMetadata(METADATA_KEY.middleware, Reflect) || [];
 
     const newMetadata = [currentMetadata, ...previousMetadata];
@@ -26,12 +25,12 @@ export function hears(
   triggers: HearsTriggers<TelegrafContext>
 ): MethodDecorator {
   return function (target, key) {
-    const metadata: interfaces.MiddlewareHearsMetadata = {
+    const metadata: MiddlewareHearsMetadata = {
       key,
       triggers,
       target,
     };
-    let metadataList: interfaces.MiddlewareHearsMetadata[] = [];
+    let metadataList: MiddlewareHearsMetadata[] = [];
 
     if (
       !Reflect.hasMetadata(METADATA_KEY.middlewareHears, target.constructor)
@@ -56,13 +55,13 @@ export function action(
   triggers: HearsTriggers<TelegrafContext>
 ): MethodDecorator {
   return function (target, key) {
-    const metadata: interfaces.MiddlewareHearsMetadata = {
+    const metadata: MiddlewareHearsMetadata = {
       key,
       triggers,
       target,
     };
 
-    let metadataList: interfaces.MiddlewareHearsMetadata[] = [];
+    let metadataList: MiddlewareHearsMetadata[] = [];
 
     if (
       !Reflect.hasMetadata(METADATA_KEY.middlewareAction, target.constructor)
@@ -85,13 +84,13 @@ export function action(
 
 export function command(command: string | string[]): MethodDecorator {
   return function (target, key) {
-    const metadata: interfaces.MiddlewareCommandMetadata = {
+    const metadata: MiddlewareCommandMetadata = {
       key,
       command,
       target,
     };
 
-    let metadataList: interfaces.MiddlewareCommandMetadata[] = [];
+    let metadataList: MiddlewareCommandMetadata[] = [];
 
     if (
       !Reflect.hasMetadata(METADATA_KEY.middlewareCommand, target.constructor)
