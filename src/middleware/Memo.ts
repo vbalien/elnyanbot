@@ -25,7 +25,7 @@ export default class MemoCommand {
   }
 
   @hears(/^\/.*/)
-  async addMemo(ctx: AppContext) {
+  async addMemo(ctx: AppContext, next: () => Promise<void>) {
     const name = ctx.message.text.slice(1);
     let memo = await this._memoModel.findOne({
       chat_id: ctx.message.chat.id,
@@ -33,7 +33,7 @@ export default class MemoCommand {
     });
 
     if (!ctx.message.reply_to_message) {
-      if (!memo) return;
+      if (!memo) return next();
       try {
         await ctx.telegram.forwardMessage(
           ctx.chat.id,
@@ -42,6 +42,7 @@ export default class MemoCommand {
         );
       } catch (e) {
         console.log(e.description);
+        return next();
       }
     } else {
       if (!memo) {
@@ -60,6 +61,7 @@ export default class MemoCommand {
         });
       } catch (e) {
         console.log(e.description);
+        return next();
       }
     }
   }

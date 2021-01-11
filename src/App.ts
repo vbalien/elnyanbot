@@ -56,6 +56,13 @@ export default class App {
         const commandMetadata = getMiddlewareCommandMetadata(
           middleware.constructor
         );
+        const actionMetadata = getMiddlewareActionMetadata(
+          middleware.constructor
+        );
+        const hearsMetadata = getMiddlewareHearsMetadata(
+          middleware.constructor
+        );
+
         for (const metadata of commandMetadata) {
           const handler = this.handlerFactory(
             MiddlewareMetadata.target.name,
@@ -63,15 +70,7 @@ export default class App {
           );
           this._bot.command(metadata.command, handler);
         }
-      }
 
-      for (const middleware of middlewares) {
-        const MiddlewareMetadata = getMiddlewareMetadata(
-          middleware.constructor
-        );
-        const actionMetadata = getMiddlewareActionMetadata(
-          middleware.constructor
-        );
         for (const metadata of actionMetadata) {
           const handler = this.handlerFactory(
             MiddlewareMetadata.target.name,
@@ -79,15 +78,7 @@ export default class App {
           );
           this._bot.action(metadata.triggers, handler);
         }
-      }
 
-      for (const middleware of middlewares) {
-        const MiddlewareMetadata = getMiddlewareMetadata(
-          middleware.constructor
-        );
-        const hearsMetadata = getMiddlewareHearsMetadata(
-          middleware.constructor
-        );
         for (const metadata of hearsMetadata) {
           const handler = this.handlerFactory(
             MiddlewareMetadata.target.name,
@@ -103,11 +94,14 @@ export default class App {
     middlewareName: string,
     key: string | symbol
   ): MiddlewareFn<AppContext> {
-    return async (ctx) => {
+    return async (ctx, next) => {
       if (typeof key === "string")
-        await ctx.container
-          .getNamed<Record<string, Function>>(TYPE.Middleware, middlewareName)
-          [key](ctx);
+        return await ctx.container
+          .getNamed<Record<string, MiddlewareFn<AppContext>>>(
+            TYPE.Middleware,
+            middlewareName
+          )
+          [key](ctx, next);
     };
   }
 
