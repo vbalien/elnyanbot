@@ -12,15 +12,17 @@
     "lint": "eslint . --ext .ts"
   },
   "dependencies": {
+    "@typegoose/typegoose": "^7.4.6",
     "@types/luxon": "^1.21.0",
+    "@types/mongoose": "^5.10.3",
     "@types/node": "^13.13.2",
     "axios": "^0.21.1",
     "inversify": "^5.0.5",
     "luxon": "^1.22.0",
     "mongodb": "^3.5.4",
+    "mongoose": "5.10.18",
     "reflect-metadata": "^0.1.13",
-    "telegraf": "^3.36.0",
-    "typeorm": "^0.2.24"
+    "telegraf": "^3.36.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.29.0",

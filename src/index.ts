@@ -1,3 +1,4 @@
+import { mongoose } from "@typegoose/typegoose";
 import { Container } from "inversify";
 import "reflect-metadata";
 import App from "./App";
@@ -7,8 +8,17 @@ import "./middleware";
 (async () => {
   const container = new Container();
   await container.loadAsync(bindings);
-  const app = new App(process.env.BOT_TOKEN, container);
+  const app = new App(process.env.BOT_TOKEN, process.env.BOT_NAME, container);
   const bot = app.build();
+
+  await mongoose.connect(
+    `mongodb://${process.env.MONGO_HOST || "localhost"}:27017/`,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      dbName: "elnyan",
+    }
+  );
 
   bot.launch();
 })();

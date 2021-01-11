@@ -1,7 +1,6 @@
 import { Container } from "inversify";
 import Telegraf from "telegraf";
 import { MiddlewareFn } from "telegraf/typings/composer";
-import { Connection as DBConn } from "typeorm";
 import { TYPE } from "./constants";
 import CommandParser, { TelegrafContextWithState } from "./util/CommandParser";
 import {
@@ -14,18 +13,20 @@ import {
 
 export interface AppContext extends TelegrafContextWithState {
   container: Container;
-  dbConn: DBConn;
 }
 
 export default class App {
   private _bot: Telegraf<AppContext>;
   private _container: Container;
 
-  constructor(botToken: string, container: Container) {
+  constructor(botToken: string, username: string, container: Container) {
     this._container = container;
     this._bot = new Telegraf<AppContext>(botToken, {
-      username: process.env.BOT_NAME,
+      username,
     });
+    this._container
+      .bind<Telegraf<AppContext>>(TYPE.BotInstance)
+      .toConstantValue(this._bot);
   }
 
   private registerCommands() {
@@ -98,7 +99,7 @@ export default class App {
     }
   }
 
-  handlerFactory(
+  private handlerFactory(
     middlewareName: string,
     key: string | symbol
   ): MiddlewareFn<AppContext> {
