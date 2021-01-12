@@ -1,5 +1,6 @@
-export { default as Countdown } from "./Countdown";
-export { default as Memo } from "./Memo";
-export { default as Select } from "./Select";
-export { default as Anitable } from "./Anitable";
-export { default as SchoolFood } from "./SchoolFood";
+import "./Countdown";
+import "./Memo";
+import "./Select";
+import "./Anitable";
+import "./SchoolFood";
+import "./Everyone";
