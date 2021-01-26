@@ -27,14 +27,18 @@ export default class MakeURL {
     const patterns = await this._urlPatternModel.find({});
     const origUrl = ctx.state.command.args;
 
-    for (const pattern of patterns) {
-      const re = new RegExp(pattern.pattern);
-      const OK = re.exec(origUrl);
-      if (!OK) continue;
-      const url = new URL(origUrl);
-      url.username = pattern.username;
-      url.password = pattern.password;
-      await ctx.reply(url.href);
+    try {
+      for (const pattern of patterns) {
+        const re = new RegExp(pattern.pattern);
+        const OK = re.exec(origUrl);
+        if (!OK) continue;
+        const url = new URL(origUrl);
+        url.username = pattern.username;
+        url.password = pattern.password;
+        await ctx.reply(url.href);
+      }
+    } catch (err) {
+      console.log(err);
     }
   }
 
