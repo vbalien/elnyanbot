@@ -43,7 +43,7 @@ export default class Anitable {
       ? "데이터가 존재하지 않습니다."
       : `${this._weekTable[weekNum]}요일 애니 편성표\n\n${data.reduce(
           (acc, cur) =>
-            acc + `${cur.time.toFormat("HH:mm")} │ ${cur.subtitle}\n`,
+            acc + `${cur.time.toFormat("HH:mm")} │ ${cur.subject}\n`,
           ""
         )}`;
   }

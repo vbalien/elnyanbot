@@ -2,7 +2,7 @@ import axios from "axios";
 import { DateTime, Interval } from "luxon";
 
 const api = axios.create({
-  baseURL: "https://www.anissia.net/anitime/",
+  baseURL: "https://anissia.net/api/anime/schedule/",
   timeout: 1000,
 });
 
@@ -19,14 +19,14 @@ export enum Weekday {
 }
 
 interface AnimeEntityRaw {
-  i: number;
-  s: string;
-  t: string;
-  g: string;
-  l: string;
-  a: boolean;
-  sd: string;
-  ed: string;
+  animeNo: number;
+  subject: string;
+  time: string;
+  genres: string;
+  website: string;
+  status: string;
+  startDate: string;
+  endDate: string;
 }
 
 export class AnimeEntity {
@@ -37,35 +37,41 @@ export class AnimeEntity {
   }
 
   get id() {
-    return this.raw.i;
+    return this.raw.animeNo;
   }
 
-  get subtitle() {
-    return this.raw.s;
+  get subject() {
+    return this.raw.subject;
   }
 
   get time() {
-    return DateTime.fromFormat(this.raw.t, "HHmm");
+    return DateTime.fromFormat(this.raw.time, "HH:mm");
   }
 
   get genre() {
-    return this.raw.g;
+    return this.raw.genres;
   }
 
   get link() {
-    return this.raw.l;
+    return this.raw.website;
   }
 
   get isAlive() {
-    return this.raw.a;
+    return this.raw.status === "ON";
   }
 
   get startDate() {
-    return DateTime.fromFormat(this.raw.sd + this.raw.t, "yyyyMMddHHmm");
+    return DateTime.fromFormat(
+      this.raw.startDate + " " + this.raw.time,
+      "yyyy-MM-dd HH:mm"
+    );
   }
 
   get endDate() {
-    return DateTime.fromFormat(this.raw.ed + this.raw.t, "yyyyMMddHHmm");
+    return DateTime.fromFormat(
+      this.raw.endDate + " " + this.raw.time,
+      "yyyy-MM-dd HH:mm"
+    );
   }
 
   get interval() {
@@ -76,9 +82,7 @@ export class AnimeEntity {
 export default {
   async list(week: Weekday): Promise<AnimeEntity[]> {
     try {
-      const raws: AnimeEntityRaw[] = (
-        await api.get("/list", { params: { w: week } })
-      ).data;
+      const raws: AnimeEntityRaw[] = (await api.get(`/${week}`)).data;
       return raws.map((raw) => new AnimeEntity(raw));
     } catch {
       return [];
