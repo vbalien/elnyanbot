@@ -76,8 +76,12 @@ class Menu {
 
 export default {
   getMenu: async (place: Place): Promise<Menu[]> => {
-    const res = await api.get(`/${place.id}.json`);
-    const menu: Menu[] = res.data.menus.map((m: MenuRaw) => new Menu(m));
-    return menu;
+    try {
+      const res = await api.get(`/${place.id}.json`);
+      const menu: Menu[] = res.data.menus.map((m: MenuRaw) => new Menu(m));
+      return menu;
+    } catch (e) {
+      return [];
+    }
   },
 };

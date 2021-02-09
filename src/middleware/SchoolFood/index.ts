@@ -29,20 +29,24 @@ export default class SchoolFood {
       disable_web_page_preview: true,
     };
 
-    const send = !ctx.callbackQuery ? ctx.reply : ctx.editMessageText;
-    if (menus.length !== 0)
-      send(
-        menus.reduce(
-          (prev, curr) =>
-            prev +
-            `<b>${curr.kind} - ${
-              curr.price +
-              (curr.image ? ` <a href="${curr.image}">사진</a>` : "")
-            }</b>\n${curr.foods}\n\n`,
-          `<b>${place.name}</b>\n`
-        ),
-        options
-      );
-    else send(`<b>${place.name}</b>\n<b>오늘은 쉽니다.</b>`, options);
+    try {
+      const send = !ctx.callbackQuery ? ctx.reply : ctx.editMessageText;
+      if (menus.length !== 0)
+        send(
+          menus.reduce(
+            (prev, curr) =>
+              prev +
+              `<b>${curr.kind} - ${
+                curr.price +
+                (curr.image ? ` <a href="${curr.image}">사진</a>` : "")
+              }</b>\n${curr.foods}\n\n`,
+            `<b>${place.name}</b>\n`
+          ),
+          options
+        );
+      else send(`<b>${place.name}</b>\n<b>오늘은 쉽니다.</b>`, options);
+    } catch (e) {
+      console.log(e);
+    }
   }
 }
