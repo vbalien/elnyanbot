@@ -68,9 +68,9 @@ class Menu {
   }
 
   get price() {
-    return (
-      this.raw.price.toString().replace(/\B(?=(\d{3})+(?!\d))/, ",") + "원"
-    );
+    return typeof this.raw.price === "number"
+      ? this.raw.price.toString().replace(/\B(?=(\d{3})+(?!\d))/, ",") + "원"
+      : undefined;
   }
 }
 

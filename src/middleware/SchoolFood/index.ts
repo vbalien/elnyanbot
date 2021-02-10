@@ -36,10 +36,10 @@ export default class SchoolFood {
           menus.reduce(
             (prev, curr) =>
               prev +
-              `<b>${curr.kind} - ${
-                curr.price +
-                (curr.image ? ` <a href="${curr.image}">사진</a>` : "")
-              }</b>\n${curr.foods}\n\n`,
+              `<b>${curr.kind}` +
+              (curr.price ? ` - ${curr.price}` : "") +
+              (curr.image ? ` <a href="${curr.image}">사진</a>` : "") +
+              `</b>\n${curr.foods}\n\n`,
             `<b>${place.name}</b>\n`
           ),
           options
