@@ -27,7 +27,7 @@ export default class MemoCommand {
   @hears(/^\/.*/)
   async addMemo(ctx: AppContext, next: () => Promise<void>) {
     const name = ctx.message.text.slice(1);
-    let memo = await this._memoModel.findOne({
+    const memo = await this._memoModel.findOne({
       chat_id: ctx.message.chat.id,
       name,
     });
@@ -45,14 +45,15 @@ export default class MemoCommand {
         return next();
       }
     } else {
-      if (!memo) {
-        memo = await this._memoModel.create({
+      await this._memoModel.update(
+        { name },
+        {
           chat_id: ctx.chat.id,
           message_id: ctx.message.reply_to_message.message_id,
           name,
-        });
-        await memo.save();
-      }
+        },
+        { setDefaultsOnInsert: true, upsert: true }
+      );
       try {
         await ctx.reply("저장하였습니다.", {
           reply_markup: new KeyboardBuilder()
