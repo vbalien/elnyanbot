@@ -31,6 +31,9 @@ export default class Apex {
         case "UP":
           statusMsg = "쌉가능~";
           break;
+        case "SLOW":
+          statusMsg = "???: 될수도 있고 안될수도 있습니다.";
+          break;
         default:
           statusMsg = "아몰랑";
       }
