@@ -23,8 +23,18 @@ export default class Apex {
       );
       if (res.status !== 200) throw Error("Apex API 호출 오류");
 
-      const status = res.data.ApexOauth_Steam.Asia.Status;
-      await ctx.reply(`**APEX 레게노**\n현재 서버상태: **${status}**`, {
+      let statusMsg = "";
+      switch (res.data.ApexOauth_Steam.Asia.Status) {
+        case "DOWN":
+          statusMsg = "응~ 못해~";
+          break;
+        case "UP":
+          statusMsg = "쌉가능~";
+          break;
+        default:
+          statusMsg = "아몰랑";
+      }
+      await ctx.reply(`APEX 레게노 가능?\n${statusMsg}`, {
         parse_mode: "MarkdownV2",
       });
     } catch (err) {
