@@ -38,7 +38,7 @@ export default class Apex {
           statusMsg = "아몰랑";
       }
       await ctx.reply(`APEX 레게노 가능?\n${statusMsg}`, {
-        parse_mode: "MarkdownV2",
+        parse_mode: "HTML",
       });
     } catch (err) {
       console.error(err);
