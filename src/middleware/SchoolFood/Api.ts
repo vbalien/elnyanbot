@@ -64,7 +64,8 @@ class Menu {
       .replace(/<br>|<\/div>/gi, "\n")
       .replace(/&nbsp;/gi, " ")
       .replace(/<.*?>/gis, "")
-      .replace(/\n+/gi, "\n");
+      .replace(/\n+/gi, "\n")
+      .trim();
   }
 
   get price() {
