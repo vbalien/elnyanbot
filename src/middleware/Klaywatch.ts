@@ -53,21 +53,17 @@ interface KlaytnBalances {
   };
 }
 
-interface Coin {
-  name: string;
-  amount: number;
-}
-
 interface Pool {
   name: string;
   amountKRW: number;
-  coins: [Coin, Coin];
+  tokens: [TokenView, TokenView];
 }
 
 interface TokenView {
   tokenName: string;
   symbol: string;
   amount: number;
+  decimals: number;
 }
 
 interface WalletInfo {
@@ -98,7 +94,7 @@ export default class Klaywatch {
       totalSupply: number,
       tokenAmount: number
     ) => {
-      return (kslpAmount / totalSupply) * tokenAmount * 1e-18;
+      return (kslpAmount / totalSupply) * tokenAmount;
     };
     const getMyKSLPAmount = (
       myBalances: KlaytnBalances,
@@ -126,11 +122,11 @@ export default class Klaywatch {
       .map((token) => ({
         tokenName: token.tokenName,
         symbol: token.symbol,
-        amount:
-          Number.parseInt(
-            myBalances.result.find((r) => r.tokenAddress === token.tokenAddress)
-              .amount
-          ) * (token.tokenName === "KUSDT" ? 1e-6 : 1e-18),
+        amount: Number.parseInt(
+          myBalances.result.find((r) => r.tokenAddress === token.tokenAddress)
+            .amount
+        ),
+        decimals: token.decimals,
       }));
     const {
       data: { result: tokenAddrInfo },
@@ -138,7 +134,8 @@ export default class Klaywatch {
     normalTokens.push({
       tokenName: "Klaytn",
       symbol: "KLAY",
-      amount: Number.parseInt(tokenAddrInfo.balance) * 1e-18,
+      amount: Number.parseInt(tokenAddrInfo.balance),
+      decimals: 18,
     });
     walletInfo.tokens = normalTokens.filter((token) => token.amount !== 0);
 
@@ -155,72 +152,93 @@ export default class Klaywatch {
         `/accounts/${pt.tokenAddress}/balances`
       );
       const m = /KlaySwap LP (\S+)-(\S+)/.exec(pt.tokenName);
-      const coins: [Coin, Coin] = [
+      const tokens: [Token, Token] = [
+        Object.values(poolBalances.tokens).find(
+          (token) => token.symbol === m[1]
+        ),
+        Object.values(poolBalances.tokens).find(
+          (token) => token.symbol === m[2]
+        ),
+      ];
+      const tokenViews: [TokenView, TokenView] = [
         {
-          name: m[1],
+          tokenName: "",
+          symbol: m[1],
           amount: 0,
+          decimals: 18,
         },
         {
-          name: m[2],
+          tokenName: "",
+          symbol: m[2],
           amount: 0,
+          decimals: 18,
         },
       ];
 
       const myKslp = getMyKSLPAmount(myBalances, pt.tokenAddress);
-      if (coins[0].name === "KLAY") {
+      if (tokenViews[0].symbol === "KLAY") {
         const {
           data: { result: tokenAddrInfo },
         } = await client.get<TokenAddressInfo>(`/accounts/${pt.tokenAddress}`);
-        coins[0].amount = tokenCalc(
+        tokenViews[0].tokenName = "Klaytn";
+        tokenViews[0].decimals = 18;
+        tokenViews[0].amount = tokenCalc(
           myKslp,
           Number.parseInt(pt.totalSupply),
           Number.parseInt(tokenAddrInfo.balance)
         );
       } else {
-        coins[0].amount = tokenCalc(
+        tokenViews[0].tokenName = tokens[0].tokenName;
+        tokenViews[0].decimals = tokens[0].decimals;
+        tokenViews[0].amount = tokenCalc(
           myKslp,
           Number.parseInt(pt.totalSupply),
           Number.parseInt(
             poolBalances.result.find(
               (el) =>
-                poolBalances.tokens[el.tokenAddress].symbol === coins[0].name
+                poolBalances.tokens[el.tokenAddress].symbol === tokens[0].symbol
             ).amount
           )
         );
       }
-      coins[1].amount = tokenCalc(
+
+      tokenViews[1].tokenName = tokens[1].tokenName;
+      tokenViews[1].decimals = tokens[1].decimals;
+      tokenViews[1].amount = tokenCalc(
         myKslp,
         Number.parseInt(pt.totalSupply),
         Number.parseInt(
           poolBalances.result.find(
             (el) =>
-              poolBalances.tokens[el.tokenAddress].symbol === coins[1].name
+              poolBalances.tokens[el.tokenAddress].symbol === tokens[1].symbol
           ).amount
         )
       );
 
-      if (coins[0].name === "KUSDT") coins[0].amount *= 1e12;
-      if (coins[1].name === "KUSDT") coins[1].amount *= 1e12;
-
       walletInfo.pools.push({
-        name: coins[0].name + "-" + coins[1].name,
+        name: tokenViews[0].symbol + "-" + tokenViews[1].symbol,
         amountKRW: 0,
-        coins,
+        tokens: tokenViews,
       });
     }
 
     return walletInfo;
   }
 
+  static getTokenNum(token: TokenView) {
+    return (
+      Math.floor(token.amount * Math.pow(10, -token.decimals) * 1e6) / 1e6
+    ).toFixed(6);
+  }
+
   makeTokenListMessage(walletInfo: WalletInfo) {
-    const viewNum = (num: number) => (Math.floor(num * 1e6) / 1e6).toFixed(6);
     const tokens = walletInfo.tokens.filter(
-      (token) => viewNum(token.amount) !== "0.000000"
+      (token) => Klaywatch.getTokenNum(token) !== "0.000000"
     );
     let tokenText = "";
     for (const token of tokens) {
       tokenText += `  ✔️${token.tokenName}\n`;
-      tokenText += `    🥇${token.symbol}: ${viewNum(token.amount)}\n`;
+      tokenText += `    🥇${token.symbol}: ${Klaywatch.getTokenNum(token)}\n`;
       if (token !== tokens[tokens.length - 1]) tokenText += "\n";
     }
     if (tokenText === "") tokenText = "보유중인 토큰이 없습니다.\n";
@@ -228,13 +246,16 @@ export default class Klaywatch {
   }
 
   makePoolListMessage(walletInfo: WalletInfo) {
-    const viewNum = (num: number) => num.toFixed(6);
     let poolText = "";
     for (const pool of walletInfo.pools) {
       poolText += `  ✔️${pool.name}\n`;
       poolText +=
-        `    🥇${pool.coins[0].name}: ${viewNum(pool.coins[0].amount)}\n` +
-        `    🥇${pool.coins[1].name}: ${viewNum(pool.coins[1].amount)}\n\n`;
+        `    🥇${pool.tokens[0].symbol}: ${Klaywatch.getTokenNum(
+          pool.tokens[0]
+        )}\n` +
+        `    🥇${pool.tokens[1].symbol}: ${Klaywatch.getTokenNum(
+          pool.tokens[1]
+        )}\n\n`;
     }
     return poolText;
   }
@@ -245,12 +266,16 @@ export default class Klaywatch {
     try {
       let address: string;
       if (ctx.state.command.args) address = ctx.state.command.args;
-      else
-        address = (
-          await this._walletModel.findOne({
-            user_id: ctx.from.id,
-          })
-        ).address;
+      else {
+        const wallet = await this._walletModel.findOne({
+          user_id: ctx.from.id,
+        });
+        if (!wallet)
+          throw Error(
+            "지갑을 설정하지 않았습니다.\nklaywatch_set 명령어로 지갑을 설정해주세요."
+          );
+        address = wallet.address;
+      }
 
       await ctx.telegram.editMessageText(
         ctx.chat.id,
