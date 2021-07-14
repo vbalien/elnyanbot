@@ -11,7 +11,7 @@ export default class Anitable {
   @command("anitable")
   @action(/^\/anitable \d$/)
   async command(ctx: AppContext) {
-    let currentWeek = Number.parseInt(ctx.state.command.args);
+    let currentWeek = Number.parseInt(ctx.command.args);
     if (Number.isNaN(currentWeek))
       currentWeek = DateTime.local().setZone("Asia/Seoul").weekday % 7;
     const data = await Api.list(currentWeek);

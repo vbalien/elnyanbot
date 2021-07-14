@@ -265,7 +265,7 @@ export default class Klaywatch {
     const msg = await ctx.reply("보유자산을 계산중입니다.");
     try {
       let address: string;
-      if (ctx.state.command.args) address = ctx.state.command.args;
+      if (ctx.command.args) address = ctx.command.args;
       else {
         const wallet = await this._walletModel.findOne({
           user_id: ctx.from.id,
@@ -311,14 +311,14 @@ export default class Klaywatch {
   @command("klaywatch_set")
   async setWallet(ctx: AppContext) {
     try {
-      if (!ctx.state.command.args) return;
+      if (!ctx.command.args) return;
       await this._walletModel.updateOne(
         {
           user_id: ctx.from.id,
         },
         {
           $set: {
-            address: ctx.state.command.args,
+            address: ctx.command.args,
           },
         },
         { upsert: true }

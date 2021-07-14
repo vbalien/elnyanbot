@@ -5,9 +5,9 @@ import { command, middleware } from "../decorators";
 export default class Select {
   @command("sel")
   command(ctx: AppContext) {
-    const len = ctx.state.command.splitArgs.length;
+    const len = ctx.command.splitArgs.length;
     if (len <= 0) return;
     const rndVal = Math.floor(Math.random() * len);
-    ctx.reply(`${ctx.state.command.splitArgs[rndVal]}`);
+    ctx.reply(`${ctx.command.splitArgs[rndVal]}`);
   }
 }

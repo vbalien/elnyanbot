@@ -2,15 +2,14 @@ import { KeyboardBuilder } from "../../util";
 import { action, command, middleware } from "../../decorators";
 import { AppContext } from "../../App";
 import Api, { places } from "./Api";
-import { ExtraReplyMessage } from "telegraf/typings/telegram-types";
+import { ExtraEditMessage } from "telegraf/typings/telegram-types";
 
 @middleware()
 export default class SchoolFood {
   @command("schoolfood")
   @action(/^\/schoolfood \d$/)
   async command(ctx: AppContext) {
-    const placeId =
-      Number.parseInt(ctx.state.command.splitArgs[0]) || places[0].id;
+    const placeId = Number.parseInt(ctx.command.splitArgs[0]) || places[0].id;
     const place = places.find((p) => p.id === placeId);
     const menus = await Api.getMenu(place);
 
@@ -23,7 +22,7 @@ export default class SchoolFood {
     }
     replyMarkup.addRow([["메시지 지우기", "delmsg"]]);
 
-    const options: ExtraReplyMessage = {
+    const options: ExtraEditMessage = {
       reply_markup: replyMarkup.build(),
       parse_mode: "HTML",
       disable_web_page_preview: true,

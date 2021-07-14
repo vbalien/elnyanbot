@@ -9,18 +9,14 @@ interface Command {
   splitArgs: string[];
 }
 
-interface State {
-  command: Command;
-}
-
-export interface TelegrafContextWithState extends TelegrafContext {
-  state?: State;
+export interface ContextWithCommand extends TelegrafContext {
+  command?: Command;
 }
 
 const regex = /^\/([^@\s]+)@?(?:(\S+)|)\s?([\s\S]+)?$/i;
 
 export default () =>
-  Telegraf.mount<TelegrafContextWithState>(
+  Telegraf.mount<ContextWithCommand>(
     ["message", "callback_query"],
     (ctx, next) => {
       let text: string | null;
@@ -46,7 +42,7 @@ export default () =>
               : parts[3].split(/\s+/).filter((arg) => arg.length);
           },
         };
-        ctx.state.command = command;
+        ctx.command = command;
       }
       return next();
     }

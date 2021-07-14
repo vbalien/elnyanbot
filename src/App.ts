@@ -2,7 +2,7 @@ import { Container } from "inversify";
 import Telegraf from "telegraf";
 import { MiddlewareFn } from "telegraf/typings/composer";
 import { TYPE } from "./constants";
-import CommandParser, { TelegrafContextWithState } from "./util/CommandParser";
+import CommandParser, { ContextWithCommand } from "./util/CommandParser";
 import {
   getMiddlewareActionMetadata,
   getMiddlewareCommandMetadata,
@@ -11,7 +11,7 @@ import {
   getMiddlewaresFromMetadata,
 } from "./util/metadata";
 
-export interface AppContext extends TelegrafContextWithState {
+export interface AppContext extends ContextWithCommand {
   container: Container;
 }
 
@@ -21,9 +21,7 @@ export default class App {
 
   constructor(botToken: string, username: string, container: Container) {
     this._container = container;
-    this._bot = new Telegraf<AppContext>(botToken, {
-      username,
-    });
+    this._bot = new Telegraf<AppContext>(botToken);
     this._container
       .bind<Telegraf<AppContext>>(TYPE.BotInstance)
       .toConstantValue(this._bot);
@@ -48,7 +46,7 @@ export default class App {
     }
 
     if (this._container.isBound(TYPE.Middleware)) {
-      const middlewares = this._container.getAll<Function>(TYPE.Middleware);
+      const middlewares = this._container.getAll(TYPE.Middleware);
       for (const middleware of middlewares) {
         const MiddlewareMetadata = getMiddlewareMetadata(
           middleware.constructor

@@ -69,7 +69,7 @@ export default class MemoCommand {
 
   @command("memodel")
   async deleteMemo(ctx: AppContext) {
-    const name = ctx.state.command.args;
+    const name = ctx.command.args;
     const memo = await this._memoModel.findOne({
       chat_id: ctx.message.chat.id,
       name,

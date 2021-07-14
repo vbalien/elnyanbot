@@ -12,26 +12,25 @@
     "lint": "eslint . --ext .ts"
   },
   "dependencies": {
-    "@typegoose/typegoose": "^7.4.6",
-    "@types/luxon": "^1.21.0",
-    "@types/mongoose": "^5.10.3",
-    "@types/node": "^13.13.2",
+    "@typegoose/typegoose": "^8.0.0-beta.21",
+    "@types/luxon": "^1.27.1",
+    "@types/node": "^16.3.2",
     "axios": "^0.21.1",
     "inversify": "^5.0.5",
-    "luxon": "^1.22.0",
-    "mongodb": "^3.5.4",
-    "mongoose": "5.10.18",
+    "luxon": "^2.0.1",
+    "mongodb": "3.6.10",
+    "mongoose": "^5.13.2",
     "reflect-metadata": "^0.1.13",
     "telegraf": "^3.36.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^2.29.0",
-    "@typescript-eslint/parser": "^2.29.0",
-    "eslint": "^6.8.0",
-    "eslint-config-prettier": "^7.1.0",
+    "@typescript-eslint/eslint-plugin": "^4.28.3",
+    "@typescript-eslint/parser": "^4.28.3",
+    "eslint": "^7.30.0",
+    "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.3.1",
-    "prettier": "^2.2.1",
-    "typescript": "^3.8.3"
+    "prettier": "^2.3.2",
+    "typescript": "^4.3.5"
   }
 }

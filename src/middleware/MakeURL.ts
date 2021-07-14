@@ -25,7 +25,7 @@ export default class MakeURL {
   @command("makeurl")
   async command(ctx: AppContext) {
     const patterns = await this._urlPatternModel.find({});
-    const origUrl = ctx.state.command.args;
+    const origUrl = ctx.command.args;
 
     try {
       for (const pattern of patterns) {
@@ -45,12 +45,12 @@ export default class MakeURL {
   @command("makeurl_add")
   async add(ctx: AppContext) {
     try {
-      if (ctx.state.command.splitArgs.length !== 4) return;
+      if (ctx.command.splitArgs.length !== 4) return;
       const pattern = await this._urlPatternModel.create({
-        name: ctx.state.command.splitArgs[0],
-        pattern: ctx.state.command.splitArgs[1],
-        username: ctx.state.command.splitArgs[2],
-        password: ctx.state.command.splitArgs[3],
+        name: ctx.command.splitArgs[0],
+        pattern: ctx.command.splitArgs[1],
+        username: ctx.command.splitArgs[2],
+        password: ctx.command.splitArgs[3],
       });
       await pattern.save();
       await ctx.reply("저장하였습니다.", {
@@ -67,7 +67,7 @@ export default class MakeURL {
   async delete(ctx: AppContext) {
     try {
       const pattern = await this._urlPatternModel.findOne({
-        name: ctx.state.command.splitArgs[0],
+        name: ctx.command.splitArgs[0],
       });
       if (!pattern) return;
       await pattern.remove();

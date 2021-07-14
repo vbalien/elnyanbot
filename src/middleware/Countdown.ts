@@ -6,9 +6,9 @@ import { command, middleware } from "../decorators";
 export default class Countdown {
   @command("cnt")
   async command(ctx: AppContext) {
-    let startCount = Number.parseInt(ctx.state.command.splitArgs[0]);
+    let startCount = Number.parseInt(ctx.command.splitArgs[0]);
     if (Number.isNaN(startCount)) startCount = 5;
-    const lastMessage: string = ctx.state.command.splitArgs[1] || "ㄱㄱ";
+    const lastMessage: string = ctx.command.splitArgs[1] || "ㄱㄱ";
     const msgs: Message[] = [];
     const delMsgs = (msgs: Message[]) => {
       for (const msg of msgs) {
