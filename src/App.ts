@@ -94,12 +94,16 @@ export default class App {
   ): MiddlewareFn<AppContext> {
     return async (ctx, next) => {
       if (typeof key === "string")
-        return await ctx.container
-          .getNamed<Record<string, MiddlewareFn<AppContext>>>(
-            TYPE.Middleware,
-            middlewareName
-          )
-          [key](ctx, next);
+        try {
+          return await ctx.container
+            .getNamed<Record<string, MiddlewareFn<AppContext>>>(
+              TYPE.Middleware,
+              middlewareName
+            )
+            [key](ctx, next);
+        } catch {
+          return next();
+        }
     };
   }
 

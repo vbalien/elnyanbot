@@ -60,6 +60,12 @@ export default class Ton {
   @command("ton_set")
   async setWallet(ctx: AppContext) {
     const walletAddress = ctx.command.splitArgs[0];
+
+    if (!walletAddress) {
+      ctx.reply("지갑을 지정해주세요.");
+      return;
+    }
+
     await this._tonModel.create({
       user_id: ctx.from.id,
       wallet_address: walletAddress,
