@@ -14,8 +14,10 @@
   "dependencies": {
     "@typegoose/typegoose": "^8.0.0-beta.21",
     "@types/luxon": "^1.27.1",
-    "@types/node": "^16.3.2",
+    "@types/node": "^16.11.12",
     "axios": "^0.21.1",
+    "bn.js": "^5.2.0",
+    "ethjs-unit": "^0.1.6",
     "inversify": "^5.0.5",
     "luxon": "^2.0.1",
     "mongodb": "3.6.10",
@@ -24,6 +26,7 @@
     "telegraf": "^3.36.0"
   },
   "devDependencies": {
+    "@types/bn.js": "^5.1.0",
     "@typescript-eslint/eslint-plugin": "^4.28.3",
     "@typescript-eslint/parser": "^4.28.3",
     "eslint": "^7.30.0",
