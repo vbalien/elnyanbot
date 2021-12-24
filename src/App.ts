@@ -101,7 +101,8 @@ export default class App {
               middlewareName
             )
             [key](ctx, next);
-        } catch {
+        } catch (err) {
+          console.error(err);
           return next();
         }
     };

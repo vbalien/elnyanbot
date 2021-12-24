@@ -17,13 +17,13 @@
     "@types/node": "^16.11.12",
     "axios": "^0.21.1",
     "bn.js": "^5.2.0",
-    "ethjs-unit": "^0.1.6",
     "inversify": "^5.0.5",
     "luxon": "^2.0.1",
     "mongodb": "3.6.10",
     "mongoose": "^5.13.2",
     "reflect-metadata": "^0.1.13",
-    "telegraf": "^3.36.0"
+    "telegraf": "^3.36.0",
+    "tonweb": "^0.0.25"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.0",
