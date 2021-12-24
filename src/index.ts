@@ -14,8 +14,6 @@ import "./middleware";
   await mongoose.connect(
     `mongodb://${process.env.MONGO_HOST || "localhost"}:27017/`,
     {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       dbName: "elnyan",
     }
   );
