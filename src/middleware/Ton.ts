@@ -5,9 +5,11 @@ import {
   ReturnModelType,
 } from "@typegoose/typegoose";
 import axios from "axios";
-import TonWeb from "tonweb";
+import BN from "bn.js";
+import { Address, fromNano, TonClient } from "ton";
 import { AppContext } from "../App";
-import { command, middleware } from "../decorators";
+import { action, command, middleware } from "../decorators";
+import { KeyboardBuilder } from "../util";
 
 @modelOptions({
   options: {
@@ -23,7 +25,8 @@ class TonModel {
 }
 
 type TemplateProps = {
-  balance: number;
+  wallet_balance: number | BN;
+  pool_balance: number | BN;
   estimated: number;
   wallet_address: string;
   exchange_krw: number;
@@ -32,7 +35,9 @@ type TemplateProps = {
 @middleware()
 export default class Ton {
   private _tonModel: ReturnModelType<typeof TonModel>;
-  private tonweb = new TonWeb();
+  private ton = new TonClient({
+    endpoint: "https://toncenter.com/api/v2/jsonRPC",
+  });
 
   private wonFormat(won: number) {
     return new Intl.NumberFormat("ko-KR", {
@@ -55,14 +60,11 @@ export default class Ton {
     const tonDay = this.round(props.estimated, 2);
     const tonWeek = this.round(props.estimated * 7, 2);
     const tonMonth = this.round(props.estimated * 30, 2);
-    const unpaid_balance = Number.parseFloat(
-      this.tonweb.utils.fromNano(props.balance)
-    );
-    const wallet_balance = Number.parseFloat(
-      this.tonweb.utils.fromNano(
-        await this.tonweb.getBalance(props.wallet_address)
-      )
-    );
+    const unpaid_balance = Number.parseFloat(fromNano(props.pool_balance));
+    const wallet_balance =
+      props.wallet_balance !== null
+        ? Number.parseFloat(fromNano(props.wallet_balance))
+        : null;
     const printTon = (amount: number) =>
       `${amount} TON ≈ ${this.wonFormat(amount * props.exchange_krw)}`;
 
@@ -71,20 +73,24 @@ export default class Ton {
 <code>${props.wallet_address}</code>
 
 ○ Wallet Balance
-  <b>${printTon(wallet_balance)}</b>
+  <b>${wallet_balance !== null ? printTon(wallet_balance) : "error"}</b>
 
 ○ Unpaid Balance
   <b>${printTon(unpaid_balance)}</b>
 
 ○ Total Balance
-  <b>${printTon(wallet_balance + unpaid_balance)}</b>
+  <b>${
+    wallet_balance !== null
+      ? printTon(
+          Number.parseFloat((wallet_balance + unpaid_balance).toFixed(9))
+        )
+      : "error"
+  }</b>
 
 ○ Estimated Earnings
   ${printTon(tonDay)} / day
   ${printTon(tonWeek)} / week
   ${printTon(tonMonth)} / month
-
-  <a href="https://tonwhales.com/mining/stats/${props.wallet_address}">more</a>
   `;
   };
 
@@ -92,10 +98,14 @@ export default class Ton {
     this._tonModel = getModelForClass(TonModel);
   }
 
+  @action(/^\/ton .+$/)
   @command("ton")
   async get_balance(ctx: AppContext) {
     let wallet_address = ctx.command.splitArgs[0];
-    const msg = await ctx.reply("계산중...");
+    const send = !ctx.callbackQuery ? ctx.reply : ctx.editMessageText;
+    const msg = await send("계산중...");
+
+    if (typeof msg === "boolean") return;
 
     try {
       if (!wallet_address) {
@@ -121,8 +131,15 @@ export default class Ton {
         ),
         axios.get("https://api.coingecko.com/api/v3/coins/the-open-network"),
       ]);
-
-      const balance = res[0].data.balance;
+      let wallet_balance: BN = null;
+      try {
+        wallet_balance = await this.ton.getBalance(
+          Address.parse(wallet_address)
+        );
+      } catch (err) {
+        wallet_balance = null;
+      }
+      const pool_balance = res[0].data.balance;
       const profit = res[1].data.pool_mined / res[1].data.pool_hashrate;
       const estimated = profit * res[1].data.day_hashrate * 0.9;
       const exchange_krw = res[2].data.market_data.current_price.krw;
@@ -132,7 +149,8 @@ export default class Ton {
         msg.message_id,
         null,
         await this.template({
-          balance,
+          wallet_balance,
+          pool_balance,
           estimated,
           wallet_address,
           exchange_krw,
@@ -140,24 +158,52 @@ export default class Ton {
         {
           parse_mode: "HTML",
           disable_web_page_preview: true,
+          reply_markup: new KeyboardBuilder()
+            .addRow([
+              ["🔄 Refresh", `/ton ${wallet_address}`],
+              [
+                "ℹ️ more",
+                `https://tonwhales.com/mining/stats/${wallet_address}`,
+              ],
+              ["❌ Delete", "delmsg"],
+            ])
+            .build(),
         }
       );
     } catch (err) {
+      console.error(err);
       await ctx.telegram.editMessageText(
         ctx.chat.id,
         msg.message_id,
         null,
-        `에러가 발생하였습니다.\n${err.message}`
+        `에러가 발생하였습니다.\n지갑주소: <code>${wallet_address}</code>\n${err.message}`,
+        {
+          parse_mode: "HTML",
+          reply_markup: new KeyboardBuilder()
+            .addRow([
+              ["🔄 Refresh", `/ton ${wallet_address}`],
+              [
+                "ℹ️ more",
+                `https://tonwhales.com/mining/stats/${wallet_address}`,
+              ],
+              ["❌ Delete", "delmsg"],
+            ])
+            .build(),
+        }
       );
     }
   }
 
   @command("ton_set")
   async setWallet(ctx: AppContext) {
-    const walletAddress = ctx.command.splitArgs[0];
+    const wallet_address = ctx.command.splitArgs[0];
 
-    if (!walletAddress) {
-      ctx.reply("지갑을 지정해주세요.");
+    if (!wallet_address) {
+      ctx.reply("지갑을 지정해주세요.", {
+        reply_markup: new KeyboardBuilder()
+          .addRow([["메시지 지우기", "delmsg"]])
+          .build(),
+      });
       return;
     }
 
@@ -166,10 +212,14 @@ export default class Ton {
         user_id: ctx.from.id,
       },
       {
-        wallet_address: walletAddress,
+        wallet_address,
       },
       { upsert: true }
     );
-    ctx.reply("지갑이 등록되었습니다.");
+    ctx.reply("지갑이 등록되었습니다.", {
+      reply_markup: new KeyboardBuilder()
+        .addRow([["메시지 지우기", "delmsg"]])
+        .build(),
+    });
   }
 }

@@ -14,7 +14,8 @@ export default class KeyboardBuilder {
     this.raw.push(
       colList.map((col) => ({
         text: col[0],
-        callback_data: col[1],
+        url: /^https?:\/\//.test(col[1]) ? col[1] : undefined,
+        callback_data: !/^https?:\/\//.test(col[1]) ? col[1] : undefined,
       }))
     );
     return this;
