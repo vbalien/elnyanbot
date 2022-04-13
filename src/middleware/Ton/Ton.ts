@@ -56,9 +56,11 @@ export default class Ton {
 
     let pool_text = "";
     for (const pool of TonPoolProviders) {
-      let pool_balance = await pool.balance(props.wallet_address);
+      const pool_balance = await pool.balance(props.wallet_address);
       total_balance += pool_balance;
-      pool_text += `  <b><a href="${pool.stat(props.wallet_address)}">${pool.name}</a></b>
+      pool_text += `  <b><a href="${pool.stat(props.wallet_address)}">${
+        pool.name
+      }</a></b>
       Unpaid Balance
         <b>${printTon(pool_balance)}</b>\n\n`;
     }
@@ -77,9 +79,7 @@ export default class Ton {
 ○ Total Balance
   <b>${
     wallet_balance !== null
-      ? printTon(
-          Number.parseFloat((total_balance).toFixed(9))
-        )
+      ? printTon(Number.parseFloat(total_balance.toFixed(9)))
       : "error"
   }</b>
   `;
@@ -124,7 +124,9 @@ export default class Ton {
         wallet_balance = null;
       }
 
-      const res = await axios.get("https://api.coingecko.com/api/v3/coins/the-open-network");
+      const res = await axios.get(
+        "https://api.coingecko.com/api/v3/coins/the-open-network"
+      );
       const exchange_krw = res.data.market_data.current_price.krw;
 
       await ctx.telegram.editMessageText(
@@ -142,10 +144,6 @@ export default class Ton {
           reply_markup: new KeyboardBuilder()
             .addRow([
               ["🔄 Refresh", `/ton ${wallet_address}`],
-              [
-                "ℹ️ More",
-                `https://tonwhales.com/mining/stats/${wallet_address}`,
-              ],
               ["❌ Delete", "delmsg"],
             ])
             .build(),
@@ -163,10 +161,6 @@ export default class Ton {
           reply_markup: new KeyboardBuilder()
             .addRow([
               ["🔄 Refresh", `/ton ${wallet_address}`],
-              [
-                "ℹ️ more",
-                `https://tonwhales.com/mining/stats/${wallet_address}`,
-              ],
               ["❌ Delete", "delmsg"],
             ])
             .build(),
