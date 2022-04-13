@@ -110,10 +110,13 @@ export default class Klaywatch {
       totalPoolAmountKRW: 0,
     };
     const client = axios.create({
-      baseURL: "https://api-cypress.scope.klaytn.com/v1/",
+      baseURL: "https://api-cypress-v2.scope.klaytn.com/v2/",
+      headers: {
+        referer: "https://scope.klaytn.com/",
+      },
     });
     const { data: myBalances } = await client.get<KlaytnBalances>(
-      `/accounts/${address}/balances`
+      `/accounts/${address}/ftBalances`
     );
 
     // Normal Tokens
@@ -128,9 +131,10 @@ export default class Klaywatch {
         ),
         decimals: token.decimals,
       }));
-    const {
-      data: { result: tokenAddrInfo },
-    } = await client.get<TokenAddressInfo>(`/accounts/${address}`);
+    const addressDataResponse = await client.get<TokenAddressInfo>(
+      `/accounts/${address}`
+    );
+    const tokenAddrInfo = addressDataResponse.data.result;
     normalTokens.push({
       tokenName: "Klaytn",
       symbol: "KLAY",
@@ -149,7 +153,7 @@ export default class Klaywatch {
 
     for (const pt of poolTokens) {
       const { data: poolBalances } = await client.get<KlaytnBalances>(
-        `/accounts/${pt.tokenAddress}/balances`
+        `/accounts/${pt.tokenAddress}/ftBalances`
       );
       const m = /KlaySwap LP (\S+)-(\S+)/.exec(pt.tokenName);
       const tokens: [Token, Token] = [

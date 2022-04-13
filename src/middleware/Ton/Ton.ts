@@ -7,9 +7,10 @@ import {
 import axios from "axios";
 import BN from "bn.js";
 import { Address, fromNano, TonClient } from "ton";
-import { AppContext } from "../App";
-import { action, command, middleware } from "../decorators";
-import { KeyboardBuilder } from "../util";
+import { AppContext } from "../../App";
+import { action, command, middleware } from "../../decorators";
+import { KeyboardBuilder } from "../../util";
+import TonPoolProviders from "./pool-providers";
 
 @modelOptions({
   options: {
@@ -26,8 +27,6 @@ class TonModel {
 
 type TemplateProps = {
   wallet_balance: number | BN;
-  pool_balance: number | BN;
-  estimated: number;
   wallet_address: string;
   exchange_krw: number;
 };
@@ -36,7 +35,7 @@ type TemplateProps = {
 export default class Ton {
   private _tonModel: ReturnModelType<typeof TonModel>;
   private ton = new TonClient({
-    endpoint: "https://toncenter.com/api/v2/jsonRPC",
+    endpoint: "https://node-1.servers.tonwhales.com/jsonRPC",
   });
 
   private wonFormat(won: number) {
@@ -46,27 +45,24 @@ export default class Ton {
     }).format(Math.floor(won));
   }
 
-  private round(value: number, decimals: number) {
-    return Number(
-      Math.round(
-        Number.parseFloat(value.toString() + "e" + decimals.toString())
-      ) +
-        "e-" +
-        decimals.toString()
-    );
-  }
-
-  private template = async (props: TemplateProps) => {
-    const tonDay = this.round(props.estimated, 2);
-    const tonWeek = this.round(props.estimated * 7, 2);
-    const tonMonth = this.round(props.estimated * 30, 2);
-    const unpaid_balance = Number.parseFloat(fromNano(props.pool_balance));
+  private async template(props: TemplateProps) {
     const wallet_balance =
       props.wallet_balance !== null
         ? Number.parseFloat(fromNano(props.wallet_balance))
         : null;
+    let total_balance = wallet_balance;
     const printTon = (amount: number) =>
       `${amount} TON ≈ ${this.wonFormat(amount * props.exchange_krw)}`;
+
+    let pool_text = "";
+    for (const pool of TonPoolProviders) {
+      let pool_balance = await pool.balance(props.wallet_address);
+      total_balance += pool_balance;
+      pool_text += `  <b><a href="${pool.stat(props.wallet_address)}">${pool.name}</a></b>
+      Unpaid Balance
+        <b>${printTon(pool_balance)}</b>\n\n`;
+    }
+    pool_text = pool_text.trim();
 
     return `
 ○ Wallet Address
@@ -75,24 +71,19 @@ export default class Ton {
 ○ Wallet Balance
   <b>${wallet_balance !== null ? printTon(wallet_balance) : "error"}</b>
 
-○ Unpaid Balance
-  <b>${printTon(unpaid_balance)}</b>
+○ Pool
+  ${pool_text}
 
 ○ Total Balance
   <b>${
     wallet_balance !== null
       ? printTon(
-          Number.parseFloat((wallet_balance + unpaid_balance).toFixed(9))
+          Number.parseFloat((total_balance).toFixed(9))
         )
       : "error"
   }</b>
-
-○ Estimated Earnings
-  ${printTon(tonDay)} / day
-  ${printTon(tonWeek)} / week
-  ${printTon(tonMonth)} / month
   `;
-  };
+  }
 
   constructor() {
     this._tonModel = getModelForClass(TonModel);
@@ -124,13 +115,6 @@ export default class Ton {
         wallet_address = walletData.wallet_address;
       }
 
-      const res = await Promise.all([
-        axios.get(`https://server1.whalestonpool.com/wallet/${wallet_address}`),
-        axios.get(
-          `https://tonminingpool.info/api/getHashrate?address=${wallet_address}`
-        ),
-        axios.get("https://api.coingecko.com/api/v3/coins/the-open-network"),
-      ]);
       let wallet_balance: BN = null;
       try {
         wallet_balance = await this.ton.getBalance(
@@ -139,10 +123,9 @@ export default class Ton {
       } catch (err) {
         wallet_balance = null;
       }
-      const pool_balance = res[0].data.balance;
-      const profit = res[1].data.pool_mined / res[1].data.pool_hashrate;
-      const estimated = profit * res[1].data.day_hashrate * 0.9;
-      const exchange_krw = res[2].data.market_data.current_price.krw;
+
+      const res = await axios.get("https://api.coingecko.com/api/v3/coins/the-open-network");
+      const exchange_krw = res.data.market_data.current_price.krw;
 
       await ctx.telegram.editMessageText(
         ctx.chat.id,
@@ -150,8 +133,6 @@ export default class Ton {
         null,
         await this.template({
           wallet_balance,
-          pool_balance,
-          estimated,
           wallet_address,
           exchange_krw,
         }),
@@ -162,7 +143,7 @@ export default class Ton {
             .addRow([
               ["🔄 Refresh", `/ton ${wallet_address}`],
               [
-                "ℹ️ more",
+                "ℹ️ More",
                 `https://tonwhales.com/mining/stats/${wallet_address}`,
               ],
               ["❌ Delete", "delmsg"],
